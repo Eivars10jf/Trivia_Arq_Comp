@@ -19,27 +19,49 @@ function init() {
     const defCol = document.getElementById('definitions');
     const conCol = document.getElementById('concepts');
     
-    [...data].sort(() => Math.random() - 0.5).forEach(item => {
+    // Crear zonas de definiciones
+    data.forEach(item => {
         const zone = document.createElement('div');
         zone.className = 'drop-zone';
         zone.innerHTML = `<p>${item.def}</p>`;
         zone.dataset.id = item.id;
-        zone.ondragover = e => e.preventDefault();
-        zone.ondrop = drop;
+        
+        // Eventos para permitir soltar
+        zone.addEventListener('dragover', e => e.preventDefault());
+        zone.addEventListener('drop', handleDrop);
         defCol.appendChild(zone);
     });
 
+    // Crear tarjetas de conceptos (mezcladas)
     [...data].sort(() => Math.random() - 0.5).forEach(item => {
         const card = document.createElement('div');
         card.className = 'concept-card';
         card.innerText = item.concept;
         card.draggable = true;
         card.id = `c-${item.id}`;
-        card.ondragstart = e => e.dataTransfer.setData('text', e.target.id);
+        
+        // Evento para empezar a arrastrar
+        card.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', e.target.id);
+        });
         conCol.appendChild(card);
     });
     
     startTimer();
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const cardId = e.dataTransfer.getData('text/plain');
+    const card = document.getElementById(cardId);
+    
+    // Asegurarse de soltar en la zona, no en el texto <p>
+    let targetZone = e.target;
+    if (targetZone.tagName === 'P') targetZone = targetZone.parentElement;
+    
+    if (targetZone.classList.contains('drop-zone')) {
+        targetZone.appendChild(card);
+    }
 }
 
 function startTimer() {
@@ -48,33 +70,44 @@ function startTimer() {
         timeLeft--;
         document.getElementById('time').innerText = timeLeft;
         bar.style.width = (timeLeft / 120 * 100) + "%";
-        if (timeLeft <= 0) { clearInterval(timer); check(); }
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            checkAnswers();
+            alert("¡Tiempo agotado!");
+        }
     }, 1000);
 }
 
-function drop(e) {
-    e.preventDefault();
-    const id = e.dataTransfer.getData('text');
-    let target = e.target;
-    if (target.tagName === 'P') target = target.parentElement;
-    if (target.classList.contains('drop-zone')) target.appendChild(document.getElementById(id));
-}
-
-function check() {
+function checkAnswers() {
     clearInterval(timer);
-    let ok = 0, fail = 0;
-    document.querySelectorAll('.drop-zone').forEach(z => {
-        const c = z.querySelector('.concept-card');
-        if (c && c.id === `c-${z.dataset.id}`) {
-            z.style.backgroundColor = "#d4edda"; ok++;
+    let correct = 0;
+    let wrong = 0;
+    const zones = document.querySelectorAll('.drop-zone');
+
+    zones.forEach(zone => {
+        const card = zone.querySelector('.concept-card');
+        if (card) {
+            const cardId = card.id.replace('c-', '');
+            if (cardId === zone.dataset.id) {
+                zone.style.backgroundColor = "#d4edda";
+                zone.style.borderColor = "#27ae60";
+                correct++;
+            } else {
+                zone.style.backgroundColor = "#f8d7da";
+                zone.style.borderColor = "#e74c3c";
+                wrong++;
+            }
         } else {
-            z.style.backgroundColor = "#f8d7da"; fail++;
+            wrong++;
         }
     });
-    document.getElementById('correct').innerText = ok;
-    document.getElementById('wrong').innerText = fail;
-    alert(`Juego terminado. Aciertos: ${ok}`);
+
+    document.getElementById('correct').innerText = correct;
+    document.getElementById('wrong').innerText = wrong;
+    alert(`Resultado: ${correct} correctas y ${wrong} incorrectas.`);
 }
 
-document.getElementById('check-btn').onclick = check;
-init();
+document.getElementById('check-btn').addEventListener('click', checkAnswers);
+
+// Iniciar juego al cargar
+window.onload = init;
