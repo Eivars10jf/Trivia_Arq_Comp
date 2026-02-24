@@ -1,115 +1,80 @@
-// 1. LISTA COMPLETA DE CONCEPTOS Y DEFINICIONES
 const data = [
-    { id: 1, concept: "Tiempo de Acceso", def: "Es el tiempo que transcurre desde que una dirección de memoria es visible para los circuitos de la memoria hasta que el dato está almacenado o está disponible para ser utilizado." },
-    { id: 2, concept: "Memoria Caché", def: "Componente que se coloca como una memoria intermedia entre la memoria principal y el procesador." },
-    { id: 3, concept: "Acceso Secuencial", def: "Se accede desde la última posición a la que se ha accedido, leyendo en orden todas las posiciones hasta llegar a la posición deseada." },
-    { id: 4, concept: "Registro", def: "Espacio de memoria que se encuentra dentro del procesador, integrado dentro del mismo chip de este." },
-    { id: 5, concept: "Procesador", def: "Sistema de propósito general capaz de hacer operaciones aritméticas y lógicas básicas, a partir de las cuales se pueden resolver problemas complejos." },
-    { id: 6, concept: "Arquitectura de Computador", def: "Conjunto de elementos del computador que son visibles desde el punto de vista del programador." },
-    { id: 7, concept: "Acceso Directo", def: "Organización en bloques y cada bloque de memoria tiene una dirección única, se accede directamente al principio de un bloque y dentro de este se hace secuencia hasta llegar a la posición deseada." },
-    { id: 8, concept: "Memoria Caché (Asociativa)", def: "Memorias de capacidad reducida, pero mas rápidas que la memoria principal, utilizan acceso asociativo, se pueden encontrar dentro del chip del procesador o cerca de él." },
-    { id: 9, concept: "Estructura de Computador", def: "Se refiere a las unidades funcionales del computador y como están interconectadas." },
-    { id: 10, concept: "Acceso Aleatorio", def: "Se organiza como un vector en el que cada elemento individual tiene una dirección única, se accede a una posición determinada proporcionando la dirección." },
-    { id: 11, concept: "Memoria Volátil", def: "Necesita de una corriente eléctrica para mantener su estado, incluyen registros, memoria caché y memoria principal." }
+    { id: 1, concept: "Tiempo de Acceso", def: "Tiempo desde que una dirección es visible hasta que el dato está disponible." },
+    { id: 2, concept: "Memoria Caché", def: "Memoria intermedia entre la memoria principal y el procesador." },
+    { id: 3, concept: "Acceso Secuencial", def: "Se accede leyendo en orden todas las posiciones hasta la deseada." },
+    { id: 4, concept: "Registro", def: "Memoria interna del procesador, integrada en el chip." },
+    { id: 5, concept: "Procesador", def: "Sistema capaz de realizar operaciones aritméticas y lógicas básicas." },
+    { id: 6, concept: "Arquitectura de Computador", def: "Elementos del computador visibles para el programador." },
+    { id: 7, concept: "Acceso Directo", def: "Organización en bloques con dirección única; acceso directo al bloque y luego secuencial." },
+    { id: 8, concept: "Caché Asociativa", def: "Memorias rápidas de capacidad reducida que usan acceso asociativo." },
+    { id: 9, concept: "Estructura de Computador", def: "Unidades funcionales y su interconexión." },
+    { id: 10, concept: "Acceso Aleatorio", def: "Cada elemento tiene una dirección única y se accede directamente." },
+    { id: 11, concept: "Memoria Volátil", def: "Requiere energía para mantener datos (Registros, Caché, RAM)." }
 ];
 
-// Variables de control
-let timeLeft = 120; // 2 minutos para 11 conceptos
+let timeLeft = 120;
 let timer;
-const timerElement = document.getElementById('time');
 
-// 2. INICIAR JUEGO
-function initGame() {
+function init() {
     const defCol = document.getElementById('definitions');
-    const conceptCol = document.getElementById('concepts');
-
-    // Limpiar columnas por si acaso
-    defCol.innerHTML = '<h3>Definiciones</h3>';
-    conceptCol.innerHTML = '<h3>Conceptos</h3>';
-
-    // Barajar las definiciones para que no coincidan con los conceptos
-    const shuffledDefinitions = [...data].sort(() => Math.random() - 0.5);
-    // Barajar los conceptos
-    const shuffledConcepts = [...data].sort(() => Math.random() - 0.5);
-
-    // Crear zonas de definiciones
-    shuffledDefinitions.forEach(item => {
+    const conCol = document.getElementById('concepts');
+    
+    [...data].sort(() => Math.random() - 0.5).forEach(item => {
         const zone = document.createElement('div');
         zone.className = 'drop-zone';
         zone.innerHTML = `<p>${item.def}</p>`;
         zone.dataset.id = item.id;
         zone.ondragover = e => e.preventDefault();
-        zone.ondrop = handleDrop;
+        zone.ondrop = drop;
         defCol.appendChild(zone);
     });
 
-    // Crear tarjetas de conceptos
-    shuffledConcepts.forEach(item => {
+    [...data].sort(() => Math.random() - 0.5).forEach(item => {
         const card = document.createElement('div');
         card.className = 'concept-card';
         card.innerText = item.concept;
         card.draggable = true;
-        card.id = `card-${item.id}`;
+        card.id = `c-${item.id}`;
         card.ondragstart = e => e.dataTransfer.setData('text', e.target.id);
-        conceptCol.appendChild(card);
+        conCol.appendChild(card);
     });
-
+    
     startTimer();
 }
 
 function startTimer() {
+    const bar = document.getElementById('progress-bar');
     timer = setInterval(() => {
         timeLeft--;
-        timerElement.innerText = timeLeft;
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            alert("¡Tiempo agotado!");
-            checkAnswers();
-        }
+        document.getElementById('time').innerText = timeLeft;
+        bar.style.width = (timeLeft / 120 * 100) + "%";
+        if (timeLeft <= 0) { clearInterval(timer); check(); }
     }, 1000);
 }
 
-function handleDrop(e) {
+function drop(e) {
     e.preventDefault();
-    const cardId = e.dataTransfer.getData('text');
-    const card = document.getElementById(cardId);
-    
-    // Si soltamos sobre la zona o sobre el texto P dentro de la zona
-    let zone = e.target;
-    if (zone.tagName === 'P') zone = zone.parentElement;
-
-    if (zone.classList.contains('drop-zone')) {
-        zone.appendChild(card);
-    }
+    const id = e.dataTransfer.getData('text');
+    let target = e.target;
+    if (target.tagName === 'P') target = target.parentElement;
+    if (target.classList.contains('drop-zone')) target.appendChild(document.getElementById(id));
 }
 
-function checkAnswers() {
-    let correct = 0;
-    let wrong = 0;
-    const zones = document.querySelectorAll('.drop-zone');
-
-    zones.forEach(zone => {
-        const card = zone.querySelector('.concept-card');
-        if (card) {
-            const cardId = card.id.split('-')[1];
-            if (cardId === zone.dataset.id) {
-                zone.style.backgroundColor = "#d4edda"; // Verde claro
-                correct++;
-            } else {
-                zone.style.backgroundColor = "#f8d7da"; // Rojo claro
-                wrong++;
-            }
+function check() {
+    clearInterval(timer);
+    let ok = 0, fail = 0;
+    document.querySelectorAll('.drop-zone').forEach(z => {
+        const c = z.querySelector('.concept-card');
+        if (c && c.id === `c-${z.dataset.id}`) {
+            z.style.backgroundColor = "#d4edda"; ok++;
+        } else {
+            z.style.backgroundColor = "#f8d7da"; fail++;
         }
     });
-
-    document.getElementById('correct').innerText = correct;
-    document.getElementById('wrong').innerText = wrong;
-    
-    clearInterval(timer);
-    alert(`Juego Terminado.\nAciertos: ${correct}\nFallos: ${wrong}`);
+    document.getElementById('correct').innerText = ok;
+    document.getElementById('wrong').innerText = fail;
+    alert(`Juego terminado. Aciertos: ${ok}`);
 }
 
-document.getElementById('check-btn').onclick = checkAnswers;
-
-// Arrancar
-initGame();
+document.getElementById('check-btn').onclick = check;
+init();
