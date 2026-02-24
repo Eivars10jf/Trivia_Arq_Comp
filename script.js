@@ -19,28 +19,29 @@ function init() {
     const defCol = document.getElementById('definitions');
     const conCol = document.getElementById('concepts');
     
+    // Limpiar columnas por si acaso
+    defCol.innerHTML = '<h3>Definiciones</h3>';
+    conCol.innerHTML = '<h3>Conceptos</h3>';
+    
     // Crear zonas de definiciones
     data.forEach(item => {
         const zone = document.createElement('div');
         zone.className = 'drop-zone';
         zone.innerHTML = `<p>${item.def}</p>`;
         zone.dataset.id = item.id;
-        
-        // Eventos para permitir soltar
         zone.addEventListener('dragover', e => e.preventDefault());
         zone.addEventListener('drop', handleDrop);
         defCol.appendChild(zone);
     });
 
     // Crear tarjetas de conceptos (mezcladas)
-    [...data].sort(() => Math.random() - 0.5).forEach(item => {
+    const shuffledData = [...data].sort(() => Math.random() - 0.5);
+    shuffledData.forEach(item => {
         const card = document.createElement('div');
         card.className = 'concept-card';
         card.innerText = item.concept;
         card.draggable = true;
         card.id = `c-${item.id}`;
-        
-        // Evento para empezar a arrastrar
         card.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', e.target.id);
         });
@@ -54,8 +55,6 @@ function handleDrop(e) {
     e.preventDefault();
     const cardId = e.dataTransfer.getData('text/plain');
     const card = document.getElementById(cardId);
-    
-    // Asegurarse de soltar en la zona, no en el texto <p>
     let targetZone = e.target;
     if (targetZone.tagName === 'P') targetZone = targetZone.parentElement;
     
@@ -66,14 +65,14 @@ function handleDrop(e) {
 
 function startTimer() {
     const bar = document.getElementById('progress-bar');
+    if(timer) clearInterval(timer);
     timer = setInterval(() => {
         timeLeft--;
-        document.getElementById('time').innerText = timeLeft;
-        bar.style.width = (timeLeft / 120 * 100) + "%";
+        if(document.getElementById('time')) document.getElementById('time').innerText = timeLeft;
+        if(bar) bar.style.width = (timeLeft / 120 * 100) + "%";
         if (timeLeft <= 0) {
             clearInterval(timer);
             checkAnswers();
-            alert("¡Tiempo agotado!");
         }
     }, 1000);
 }
@@ -90,11 +89,9 @@ function checkAnswers() {
             const cardId = card.id.replace('c-', '');
             if (cardId === zone.dataset.id) {
                 zone.style.backgroundColor = "#d4edda";
-                zone.style.borderColor = "#27ae60";
                 correct++;
             } else {
                 zone.style.backgroundColor = "#f8d7da";
-                zone.style.borderColor = "#e74c3c";
                 wrong++;
             }
         } else {
@@ -104,10 +101,8 @@ function checkAnswers() {
 
     document.getElementById('correct').innerText = correct;
     document.getElementById('wrong').innerText = wrong;
-    alert(`Resultado: ${correct} correctas y ${wrong} incorrectas.`);
+    alert("Resultado: " + correct + " correctas.");
 }
 
-document.getElementById('check-btn').addEventListener('click', checkAnswers);
-
-// Iniciar juego al cargar
+document.getElementById('check-btn').onclick = checkAnswers;
 window.onload = init;
