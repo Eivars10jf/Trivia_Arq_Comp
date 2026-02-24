@@ -1,0 +1,108 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.game-container {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    max-width: 900px;
+    width: 100%;
+}
+
+.game-board {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.column {
+    flex: 1;
+    min-height: 400px;
+}
+
+.drop-zone {
+    background: #e9ecef;
+    border: 2px dashed #adb5bd;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 50px;
+}
+
+.concept-card {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: grab;
+    text-align: center;
+}
+
+.correct { background-color: #28a745 !important; }
+.incorrect { background-color: #dc3545 !important; }
+
+button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+/* Estilos para que las columnas funcionen */
+.game-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.game-board {
+    display: flex; /* Esto pone las columnas una al lado de la otra */
+    justify-content: space-around;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.column {
+    flex: 1;
+    background: #f4f4f4;
+    padding: 15px;
+    border-radius: 10px;
+    min-height: 500px;
+}
+
+.drop-zone {
+    border: 2px dashed #ccc;
+    margin: 10px 0;
+    padding: 10px;
+    min-height: 60px;
+    background: white;
+    font-size: 14px;
+}
+
+.concept-card {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    cursor: grab;
+    font-weight: bold;
+}
+
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    font-weight: bold;
+}
